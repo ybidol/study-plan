@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code Study Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181a23;
+    --surface2: #1e2130;
+    --border: #2a2d3e;
+    --text: #e0e0e8;
+    --text-dim: #8888a0;
+    --accent: #c8a2ff;
+    --accent-dim: #6e4fa0;
+    --green: #5ce89e;
+    --green-dim: #1a3a2a;
+    --orange: #ffb86c;
+    --blue: #82b1ff;
+    --red: #ff6b8a;
+    --phase1: #82b1ff;
+    --phase2: #c8a2ff;
+    --phase3: #ffb86c;
+    --phase4: #ff6b8a;
+    --phase5: #5ce89e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .grain {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 2.6rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Progress bar */
+  .progress-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 40px;
+    position: sticky;
+    top: 12px;
+    z-index: 10;
+    backdrop-filter: blur(12px);
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .progress-header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+
+  .progress-header strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--green);
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--phase1), var(--phase2), var(--phase3), var(--phase4), var(--phase5));
+    border-radius: 4px;
+    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    width: 0%;
+  }
+
+  .phase-pills {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .phase-pill {
+    font-size: 0.72rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 99px;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .phase-pill:hover { transform: translateY(-1px); filter: brightness(1.2); }
+
+  /* Phase sections */
+  .phase {
+    margin-bottom: 48px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .phase-header:hover .phase-title { filter: brightness(1.3); }
+
+  .phase-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .phase-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.6rem;
+    font-weight: 400;
+    transition: filter 0.2s;
+  }
+
+  .phase-meta {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    padding-left: 2px;
+  }
+
+  .phase-progress-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+
+  .card:hover {
+    border-color: #3a3d50;
+    transform: translateY(-1px);
+  }
+
+  .card.completed {
+    opacity: 0.55;
+    border-color: var(--border);
+  }
+
+  .card.completed .card-title { text-decoration: line-through; text-decoration-color: var(--text-dim); }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  /* Custom checkbox */
+  .checkbox-wrap {
+    flex-shrink: 0;
+    position: relative;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+  }
+
+  .checkbox-wrap input {
+    position: absolute;
+    opacity: 0;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    z-index: 2;
+    margin: 0;
+  }
+
+  .checkmark {
+    position: absolute;
+    top: 0; left: 0;
+    width: 22px; height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    transition: all 0.2s;
+  }
+
+  .checkbox-wrap input:checked ~ .checkmark {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .checkmark::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 6px; top: 2px;
+    width: 6px; height: 11px;
+    border: solid var(--bg);
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-wrap input:checked ~ .checkmark::after { display: block; }
+
+  .card-body { flex: 1; }
+
+  .card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+  }
+
+  .card-desc {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(200, 162, 255, 0.08);
+    border: 1px solid rgba(200, 162, 255, 0.15);
+    transition: all 0.2s;
+    word-break: break-all;
+  }
+
+  .card-link:hover {
+    background: rgba(200, 162, 255, 0.15);
+    border-color: rgba(200, 162, 255, 0.3);
+  }
+
+  .card-link::before { content: '↗'; }
+
+  .badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .badge-read { background: rgba(255,184,108,0.15); color: var(--orange); }
+  .badge-hands-on { background: rgba(200,162,255,0.15); color: var(--accent); }
+  .badge-essential { background: rgba(92,232,158,0.12); color: var(--green); }
+  .badge-fix-leak { background: rgba(255,107,138,0.15); color: var(--red); }
+
+  .card-steps {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .card-steps-title {
+    color: var(--blue);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .card-steps ol { margin: 0; padding-left: 18px; }
+  .card-steps li { padding: 1px 0; }
+
+  .card-check {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.74rem;
+    color: var(--green);
+    padding: 6px 10px;
+    background: rgba(92,232,158,0.06);
+    border-left: 2px solid var(--green);
+    border-radius: 4px;
+  }
+  .card-check::before { content: '✓ DONE WHEN  '; opacity: 0.7; font-size: 0.68rem; }
+
+  .card-extras {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .card-extras-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+  .card-extra {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(130, 177, 255, 0.08);
+    border: 1px solid rgba(130, 177, 255, 0.2);
+    color: var(--blue);
+    text-decoration: none;
+  }
+  .card-extra:hover { background: rgba(130, 177, 255, 0.15); }
+  .card-extra::before { content: '📖 '; }
+
+  .companion {
+    background: linear-gradient(135deg, rgba(200,162,255,0.1), rgba(92,232,158,0.06));
+    border: 1px solid rgba(200,162,255,0.3);
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+  .companion-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    width: 100%;
+  }
+  .companion-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    width: 100%;
+  }
+  .companion-desc {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    width: 100%;
+    line-height: 1.55;
+    margin-bottom: 4px;
+  }
+  .companion-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.76rem;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: rgba(200, 162, 255, 0.1);
+    border: 1px solid rgba(200, 162, 255, 0.25);
+  }
+  .companion-link:hover { background: rgba(200, 162, 255, 0.2); }
+
+/* Practice section */
+  .practice {
+    background: var(--surface2);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .practice-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--orange);
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .practice-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 0;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+
+  .practice-item.completed-practice { text-decoration: line-through; opacity: 0.5; }
+
+  /* Repos & Reference tables */
+  .ref-section {
+    margin-top: 48px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .ref-section h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 20px;
+  }
+
+  .ref-grid {
+    display: grid;
+    gap: 10px;
+  }
+
+  .ref-group-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-top: 14px;
+    margin-bottom: 2px;
+  }
+  .ref-group-title:first-child { margin-top: 0; }
+
+  .ref-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .ref-item-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+
+  .ref-item-desc {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .ref-item a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(200, 162, 255, 0.08);
+    border: 1px solid rgba(200, 162, 255, 0.15);
+    white-space: nowrap;
+  }
+
+  .ref-item a:hover { background: rgba(200, 162, 255, 0.15); }
+
+  /* Daily habit */
+  .daily-habit {
+    background: linear-gradient(135deg, rgba(200,162,255,0.08), rgba(130,177,255,0.08));
+    border: 1px solid rgba(200,162,255,0.2);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 48px;
+    text-align: center;
+  }
+
+  .daily-habit h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+
+  .daily-habit p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    max-width: 550px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* Reset button */
+  .reset-wrap {
+    text-align: center;
+    margin-top: 48px;
+  }
+
+  .reset-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    .phase-title { font-size: 1.3rem; }
+    .container { padding: 24px 16px 80px; }
+    .progress-container { position: static; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="container">
+
+<header>
+  <h1>Claude Code Study Plan</h1>
+  <p>Leak-fix → Extensions → SDK → Automation &nbsp;·&nbsp; ~5 weeks · ~1 hr/day · max 2 hrs · pace yourself</p>
+</header>
+
+<div class="companion">
+  <div class="companion-label">COMPANION COURSE</div>
+  <div class="companion-title">Claude Code in Action</div>
+  <div class="companion-desc">Anthropic's official free course. Follow it alongside this plan — it teaches the CLI, so it works with your Claude Pro/Max OAuth (no API key required). Certificate at the end.</div>
+  <a class="companion-link" href="https://anthropic.skilljar.com/claude-code-in-action" target="_blank">Open on Skilljar ↗</a>
+</div>
+
+<div class="progress-container" id="progressContainer">
+  <div class="progress-header">
+    <span>Overall Progress</span>
+    <strong id="progressText">0 / 0</strong>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="phase-pills" id="phasePills"></div>
+</div>
+
+<div id="content"></div>
+
+<div class="ref-section">
+  <h2>GitHub Repos to Star</h2>
+  <div class="ref-grid" id="reposGrid"></div>
+</div>
+
+<div class="ref-section">
+  <h2>Ongoing Reference</h2>
+  <div class="ref-grid" id="refGrid"></div>
+</div>
+
+<div class="daily-habit">
+  <h3>Daily Habit</h3>
+  <p>Spend the first 10 minutes reading docs or watching a tutorial.<br>
+  Spend the remaining time practicing in your terminal.<br>
+  Translate what you learn into real project work.</p>
+</div>
+
+<div class="reset-wrap">
+  <button class="reset-btn" onclick="resetProgress()">Reset all progress</button>
+</div>
+
+</div>
+
+<script>
+const DATA = {
+  phases: [
+    {
+      id: 'phase1',
+      number: 'WEEK 1',
+      title: 'Context & Cost — fix the leaks',
+      week: 'Week 1 · ~1 hr/day · spread over however many days you need',
+      color: '#82b1ff',
+      items: [
+        {
+          id: 'd1', label: 'Day 1', title: 'Context management (/clear, /compact, /resume)',
+          desc: "The single biggest cost lever. Context grows every turn; without /clear, you re-pay for everything each message.",
+          url: 'https://code.claude.com/docs/en/context-window',
+          badges: ['read', 'fix-leak'], time: '45 min',
+          steps: [
+            'Read the context-window page end to end',
+            'Start a session, inspect the in-REPL context visualization',
+            'Run two unrelated tasks — use /clear between them',
+            'Try /compact on a long session and /resume to return to it'
+          ],
+          check: '/clear used at least twice today between unrelated tasks'
+        },
+        {
+          id: 'd2', label: 'Day 2', title: 'Model selection, aliases, effort levels',
+          desc: "Opus is ~5× the cost of Sonnet. Most tasks don't need Opus — learn when to drop down.",
+          url: 'https://code.claude.com/docs/en/model-config',
+          badges: ['read', 'fix-leak'], time: '45 min',
+          steps: [
+            'Read model-config: /model, aliases, effort levels',
+            'Try /model opusplan (Opus for plans, Sonnet for execution)',
+            'Run one full session forced to Sonnet',
+            'Compare output quality vs. the Opus baseline'
+          ],
+          check: 'A full Sonnet session produced acceptable results for a real task',
+          extras: [
+            { name: 'Choosing the right Claude model', url: 'https://claude.com/resources/tutorials/choosing-the-right-claude-model' }
+          ]
+        },
+        {
+          id: 'd3', label: 'Day 3', title: 'Memory — CLAUDE.md deep dive',
+          desc: "Full spec for project vs user memory, @ imports, and the boundary between memory and skills.",
+          url: 'https://code.claude.com/docs/en/memory',
+          badges: ['read'], time: '60 min',
+          steps: [
+            'Read the memory page',
+            'Open an existing CLAUDE.md in any repo',
+            'Identify one item that belongs in a skill, not memory',
+            'Move it or at least mark it for extraction'
+          ],
+          check: 'One CLAUDE.md audited; at least one item identified as skill-worthy'
+        },
+        {
+          id: 'd4', label: 'Day 4', title: 'Settings + permissions + permission modes',
+          desc: "The why behind every permission prompt: allowedTools, denyTools, and the four modes (default / plan / acceptEdits / bypassPermissions).",
+          url: 'https://code.claude.com/docs/en/settings',
+          badges: ['read'], time: '75 min',
+          steps: [
+            'Read the settings page and permissions section',
+            'Open a real .claude/settings.json (or create one)',
+            'Add one allow rule and one deny rule you actually want',
+            'Switch permission mode mid-session and observe the difference'
+          ],
+          check: 'One allow + one deny rule live in a real settings.json'
+        },
+        {
+          id: 'd5', label: 'Day 5', title: 'CLI reference + built-in slash commands',
+          desc: "Every flag and every built-in command. You will find features you didn't know existed.",
+          url: 'https://code.claude.com/docs/en/cli-reference',
+          badges: ['read'], time: '60 min',
+          steps: [
+            'Read cli-reference in full',
+            'Run /help and skim every built-in slash command',
+            'Write down 2+ flags or commands you didn\'t know',
+            'Try one of them on a real task today'
+          ],
+          check: 'At least two new flags/commands noted and one used today'
+        },
+        {
+          id: 'd6', label: 'Day 6', title: 'Common workflows · part 1 (plan mode + @mentions)',
+          desc: "Highest-density page in the docs. Plan mode produces an approved plan before any edits; @mentions point Claude at specific files/dirs.",
+          url: 'https://code.claude.com/docs/en/common-workflows',
+          badges: ['read', 'essential'], time: '75 min',
+          steps: [
+            'Read common-workflows up through the plan-mode section',
+            'Pick a real multi-file change in any project',
+            'Start it in plan mode and approve the plan before edits',
+            'Use @filename at least once instead of "find the file"'
+          ],
+          check: 'Plan mode used on a real multi-file change today'
+        },
+        {
+          id: 'd7', label: 'Day 7', title: 'Common workflows · part 2 (thinking + git)',
+          desc: "Thinking keywords (\"think\", \"think hard\", \"ultrathink\") and the git workflow patterns — when depth buys you something.",
+          url: 'https://code.claude.com/docs/en/common-workflows',
+          badges: ['read', 'essential'], time: '75 min',
+          steps: [
+            'Finish common-workflows: thinking keywords + git patterns',
+            'Ask the same hard question twice: once normal, once with "ultrathink"',
+            'Compare the depth of both responses',
+            'Use one git pattern from the docs on a real commit'
+          ],
+          check: '"ultrathink" visibly changed response depth vs a normal prompt',
+          extras: [
+            { name: 'Get the most from Claude Opus 4.6 (extended thinking)', url: 'https://claude.com/resources/tutorials/get-the-most-from-claude-opus-4-6' }
+          ]
+        }
+      ],
+      practice: [
+        { id: 'w1p1', text: 'Used /clear between at least two unrelated tasks this week' },
+        { id: 'w1p2', text: 'Ran one full session on Sonnet instead of Opus' },
+        { id: 'w1p3', text: 'Tried /model opusplan once' },
+        { id: 'w1p4', text: 'Added one allow + one deny rule to a real .claude/settings.json' },
+        { id: 'w1p5', text: 'Used plan mode on a real multi-file change' },
+        { id: 'w1p6', text: 'Used "ultrathink" in one prompt' },
+        { id: 'w1p7', text: 'Used @filename instead of "find the file" at least once' }
+      ]
+    },
+    {
+      id: 'phase2',
+      number: 'WEEK 2',
+      title: 'Extensions You Control',
+      week: 'Week 2 · ~1 hr/day · hands-on days may reach 90 min',
+      color: '#c8a2ff',
+      items: [
+        {
+          id: 'd8', label: 'Day 8', title: 'Hooks — read',
+          desc: "Hooks are deterministic shell commands the harness runs around tool calls. The JSON contract and exit codes are the whole API.",
+          url: 'https://code.claude.com/docs/en/hooks',
+          badges: ['read'], time: '60 min',
+          steps: [
+            'Read the hooks page end to end',
+            'Memorize the 5 events: PreToolUse, PostToolUse, UserPromptSubmit, SessionStart, Stop',
+            'Understand exit codes: 0 = allow, 2 = block with stderr fed back to Claude',
+            'Sketch one hook you\'d want in a real project'
+          ],
+          check: 'Can name all 5 hook events and what exit code 2 does'
+        },
+        {
+          id: 'd9', label: 'Day 9', title: 'Hooks — hands-on (linter feedback loop)',
+          desc: "Build one real hook: after Claude writes a file, run the linter; on failure, block with stderr so Claude reads the errors and fixes them.",
+          url: 'https://code.claude.com/docs/en/hooks',
+          badges: ['hands-on', 'essential'], time: '90 min',
+          steps: [
+            'Pick a linter for a language you actually use (ruff, eslint, gofmt)',
+            'Add a PostToolUse hook in settings.json matching that file type',
+            'Hook runs linter on the edited file; exit 2 with stderr on failure',
+            'Deliberately introduce a lint error and watch Claude fix it from the feedback'
+          ],
+          check: 'Hook returned exit 2 and Claude auto-corrected the lint error'
+        },
+        {
+          id: 'd10', label: 'Day 10', title: 'Skills — read',
+          desc: "Skills are markdown + YAML frontmatter loaded on demand. The key distinction: memory is always loaded, skills are loaded only when invoked.",
+          url: 'https://code.claude.com/docs/en/skills',
+          badges: ['read'], time: '60 min',
+          steps: [
+            'Read the skills page',
+            'Open one built-in skill file and read its frontmatter',
+            'Write a one-sentence rule: when does content belong in a skill vs CLAUDE.md?',
+            'List 3 repeated tasks in your workflow that could be skills'
+          ],
+          check: 'Can state the memory-vs-skill rule in one sentence',
+          extras: [
+            { name: 'What are skills?', url: 'https://claude.com/resources/tutorials/what-are-skills' },
+            { name: 'How skills compare to other Claude Code features', url: 'https://claude.com/resources/tutorials/how-skills-compare-to-other-claude-code-features' }
+          ]
+        },
+        {
+          id: 'd11', label: 'Day 11', title: 'Skills — write your own',
+          desc: "Write one real skill for something you repeat manually. Description field is what the model reads to decide whether to invoke it — write it carefully.",
+          url: 'https://code.claude.com/docs/en/skills',
+          badges: ['hands-on'], time: '75 min',
+          steps: [
+            'Create ~/.claude/skills/<name>/SKILL.md',
+            'Write frontmatter: name + a precise description of when to use it',
+            'Write the body: the actual instructions the model will follow',
+            'Invoke it via /<skillname> on a real task'
+          ],
+          check: '/<skillname> invoked your skill and completed a real task',
+          extras: [
+            { name: 'How skills compare to other Claude Code features', url: 'https://claude.com/resources/tutorials/how-skills-compare-to-other-claude-code-features' }
+          ]
+        },
+        {
+          id: 'd12', label: 'Day 12', title: 'Custom slash commands',
+          desc: "Commands live in .claude/commands/*.md — they're prompt templates, not skills. Use them when you want to save typing on a prompt you reuse verbatim.",
+          url: 'https://code.claude.com/docs/en/commands',
+          badges: ['read', 'hands-on'], time: '75 min',
+          steps: [
+            'Read the commands page',
+            'Identify your single most repeated prompt',
+            'Create .claude/commands/<name>.md with that prompt as the body',
+            'Use $ARGUMENTS if it needs input; invoke it with /<name>'
+          ],
+          check: 'One custom command used today to replace a repeated prompt'
+        },
+        {
+          id: 'd13', label: 'Day 13', title: 'Subagents — read',
+          desc: "Subagents run in isolated context and return a summary — not state. Tool restrictions and model choice per agent are the main levers.",
+          url: 'https://code.claude.com/docs/en/sub-agents',
+          badges: ['read', 'essential'], time: '75 min',
+          steps: [
+            'Read sub-agents page',
+            'Study the frontmatter fields: tools, model, description',
+            'Understand why a review agent should get Read/Grep only',
+            'Note the rule: subagents return summaries, so prompt for what you want back'
+          ],
+          check: 'Can explain context isolation and tool-restriction in one sentence'
+        },
+        {
+          id: 'd14', label: 'Day 14', title: 'Subagents — write a review trio',
+          desc: "Three agents for a parallel review pass: code-reuse, code-quality, efficiency. Each gets Read/Grep only and Sonnet as the default model.",
+          url: 'https://code.claude.com/docs/en/sub-agents',
+          badges: ['hands-on', 'essential'], time: '120 min',
+          steps: [
+            'Create three files in .claude/agents/',
+            'Each frontmatter: tools=[Read, Grep], model=sonnet, a focused description',
+            'Each body: a distinct review checklist (reuse / quality / efficiency)',
+            'Run all three in parallel on a real diff and compare findings'
+          ],
+          check: 'Review workflow routes through your own agents on Sonnet in parallel'
+        }
+      ],
+      practice: [
+        { id: 'w2p1', text: 'Linter hook blocks a write on lint failure' },
+        { id: 'w2p2', text: 'Invoked your own skill via /<skillname>' },
+        { id: 'w2p3', text: 'Created one custom slash command for a repeated prompt' },
+        { id: 'w2p4', text: 'Review workflow routes through your own .claude/agents/ on Sonnet' },
+        { id: 'w2p5', text: 'Subagents are tool-restricted (no Edit, no Bash)' }
+      ]
+    },
+    {
+      id: 'phase3',
+      number: 'WEEK 3',
+      title: 'Programmable Claude',
+      week: 'Week 3 · ~1 hr/day · SDK integration days up to 2 hrs',
+      color: '#ffb86c',
+      items: [
+        {
+          id: 'd15', label: 'Day 15', title: 'MCP — concepts',
+          desc: "MCP is how new tools reach Claude without modifying Claude itself: servers expose tools/resources/prompts, the client consumes them.",
+          url: 'https://code.claude.com/docs/en/mcp',
+          badges: ['read', 'essential'], time: '75 min',
+          steps: [
+            'Read the MCP page',
+            'Draw the client/server/tool diagram on paper or in a note',
+            'List the three scopes (local / project / user) and a use case for each',
+            'Browse the official MCP server registry'
+          ],
+          check: 'Can reproduce the MCP architecture diagram from memory'
+        },
+        {
+          id: 'd16', label: 'Day 16', title: 'MCP — install your first server',
+          desc: "Start with the filesystem server — lowest-risk, highest-overlap-with-existing-tools so you can feel the difference.",
+          url: 'https://code.claude.com/docs/en/mcp',
+          badges: ['hands-on', 'essential'], time: '90 min',
+          steps: [
+            'Install the filesystem MCP server',
+            'Pick scope: project or user (whichever fits)',
+            'Verify with /mcp',
+            'Complete one real task using the MCP tools instead of built-in Read/Glob'
+          ],
+          check: '/mcp lists the server and it was used once on a real task'
+        },
+        {
+          id: 'd17', label: 'Day 17', title: 'MCP — second server + scopes',
+          desc: "A second server cements the pattern. Pick one that gives you a capability you don't already have (github or sqlite).",
+          url: 'https://code.claude.com/docs/en/mcp',
+          badges: ['hands-on'], time: '90 min',
+          steps: [
+            'Install github or sqlite MCP server',
+            'Install it at a different scope than day 16',
+            'Audit both servers with /mcp',
+            'Use the new server for one real task'
+          ],
+          check: 'Two MCP servers at different scopes visible in /mcp, both used'
+        },
+        {
+          id: 'd18', label: 'Day 18', title: 'Claude Agent SDK — overview',
+          desc: "SDK vs CLI: the SDK is typed, streaming, and programmatic — you embed Claude in your app instead of shelling out.",
+          url: 'https://code.claude.com/docs/en/agent-sdk/overview',
+          badges: ['read', 'essential'], time: '75 min',
+          steps: [
+            'Read the SDK overview (Python + TS)',
+            'Skim the API surface: query, tool definitions, streaming',
+            'Write a one-sentence answer: how is SDK different from CLI -p?',
+            'Decide: Python or TypeScript for day 19'
+          ],
+          check: 'Can state the SDK-vs-CLI difference in one sentence'
+        },
+        {
+          id: 'd19', label: 'Day 19', title: 'Agent SDK — first script',
+          desc: "A 20–30 line script: spawn an agent, ask a question, stream the response. Every SDK project you build later starts from this skeleton.",
+          url: 'https://code.claude.com/docs/en/agent-sdk/overview',
+          badges: ['hands-on', 'essential'], time: '105 min',
+          steps: [
+            'pip install claude-agent-sdk (or npm i for TS)',
+            'Write a script that takes a question and streams the answer',
+            'Run it and watch tokens arrive in real time',
+            'Try passing a system prompt and see the behavior change'
+          ],
+          check: 'Script streams a response to stdout in real time'
+        },
+        {
+          id: 'd20', label: 'Day 20', title: 'Agent SDK — embed in a real app',
+          desc: "Replace one shell-out-to-CLI or one static response in a real app with an SDK call. Typed and streaming beats subprocess every time.",
+          url: 'https://code.claude.com/docs/en/agent-sdk/overview',
+          badges: ['hands-on', 'essential'], time: '120 min',
+          steps: [
+            'Pick one app of yours with an existing LLM call (or a spot that needs one)',
+            'Add an endpoint or function that calls the SDK',
+            'Stream the response back to the user where possible',
+            'Remove the old shell-out or mock if there was one'
+          ],
+          check: 'One real app now calls the SDK instead of shelling out'
+        },
+        {
+          id: 'd21', label: 'Day 21', title: 'Headless mode (-p flag)',
+          desc: "claude -p with --output-format json makes Claude a Unix tool. Perfect for cron, CI, and one-shot tasks where you don\'t need a session.",
+          url: 'https://code.claude.com/docs/en/headless',
+          badges: ['read', 'hands-on'], time: '90 min',
+          steps: [
+            'Read the headless page',
+            'Run claude -p "..." --output-format json manually',
+            'Write a shell script that parses the JSON with jq',
+            'Schedule it via cron or your harness scheduler'
+          ],
+          check: 'A shell script parses claude -p JSON output and runs on a schedule'
+        }
+      ],
+      practice: [
+        { id: 'w3p1', text: 'Two MCP servers installed and actually used in real tasks' },
+        { id: 'w3p2', text: 'SDK script runs locally and streams output' },
+        { id: 'w3p3', text: 'SDK integrated into one of your real apps (even minimally)' },
+        { id: 'w3p4', text: 'One shell script or cron job uses claude -p' }
+      ]
+    },
+    {
+      id: 'phase4',
+      number: 'WEEK 4',
+      title: 'Safety, Automation, Capstone',
+      week: 'Week 4–5 · ~1 hr/day · capstone day will be 2 hrs',
+      color: '#5ce89e',
+      items: [
+        {
+          id: 'd22', label: 'Day 22', title: 'Sandboxing',
+          desc: "OS-level isolation that ships with Claude Code. Cheaper than a container, stronger than nothing — know when each fits.",
+          url: 'https://code.claude.com/docs/en/sandboxing',
+          badges: ['read'], time: '60 min',
+          steps: [
+            'Read the sandboxing page',
+            'Enable /sandbox and try one task inside it',
+            'Note one case where sandbox is enough',
+            'Note one case where you\'d still want a full container'
+          ],
+          check: 'Can name one sandbox-enough case and one container-required case'
+        },
+        {
+          id: 'd23', label: 'Day 23', title: 'Official devcontainer',
+          desc: "The one place --dangerously-skip-permissions is actually safe: inside the official devcontainer with init-firewall.sh restricting egress.",
+          url: 'https://code.claude.com/docs/en/devcontainer',
+          badges: ['read', 'hands-on'], time: '105 min',
+          steps: [
+            'Clone anthropics/claude-code',
+            'Read .devcontainer/ including init-firewall.sh',
+            'Build and enter the devcontainer',
+            'Run claude --dangerously-skip-permissions inside it for one real task'
+          ],
+          check: 'Claude ran in the devcontainer with skip-permissions on a real task'
+        },
+        {
+          id: 'd24', label: 'Day 24', title: 'Checkpoints + output styles + statusline',
+          desc: "Three quality-of-life features: /rewind to undo, /output-style to adjust tone, and a statusline that shows model + token count + git branch.",
+          url: 'https://code.claude.com/docs/en/checkpointing',
+          badges: ['read', 'hands-on'], time: '90 min',
+          steps: [
+            'Read checkpointing, output-styles, and statusline docs',
+            'Deliberately make a bad edit and /rewind it',
+            'Try one non-default output style',
+            'Install/customize a statusline showing model + token count + branch'
+          ],
+          check: '/rewind used and statusline shows model + token count'
+        },
+        {
+          id: 'd25', label: 'Day 25', title: 'IDE integration (VSCode / JetBrains)',
+          desc: "The extension links your editor to a running Claude Code session — edits show up live. Big win if you normally alt-tab between terminal and editor.",
+          url: 'https://code.claude.com/docs/en/overview',
+          badges: ['hands-on'], time: '60 min',
+          steps: [
+            'Install the VSCode or JetBrains extension',
+            'Link it to your Claude Code session',
+            'Edit files in the IDE while claude is running',
+            'Complete one real task end-to-end through the IDE'
+          ],
+          check: 'Completed one real task using the IDE extension'
+        },
+        {
+          id: 'd26', label: 'Day 26', title: 'GitHub Actions — read',
+          desc: "claude-code-action is GA — it can review PRs, respond to @claude mentions, and implement small changes. Production-ready.",
+          url: 'https://code.claude.com/docs/en/github-actions',
+          badges: ['read'], time: '75 min',
+          steps: [
+            'Read the github-actions page',
+            'Study the minimal YAML example',
+            'Understand the trigger events (PR open, @claude mention, etc.)',
+            'Draft the YAML you\'d use for one of your own private repos'
+          ],
+          check: 'Drafted minimal YAML for @claude PR review'
+        },
+        {
+          id: 'd27', label: 'Day 27', title: 'GitHub Actions — wire into a real repo',
+          desc: "Add the action to a private repo only — public-repo spam burns budget fast. Tune until the review is actually useful.",
+          url: 'https://code.claude.com/docs/en/github-actions',
+          badges: ['hands-on'], time: '105 min',
+          steps: [
+            'Add claude-code-action to one private repo',
+            'Open a test PR with a real change',
+            'Watch Claude review it',
+            'Tune the YAML (focus, model, tools) until the review is useful'
+          ],
+          check: 'One PR on a private repo was usefully reviewed by the action'
+        },
+        {
+          id: 'd28', label: 'Day 28', title: 'Capstone — integrate everything',
+          desc: "Build one feature that touches at least 4 primitives. Goal is muscle memory, not perfection. Two-hour timebox.",
+          url: 'https://code.claude.com/docs/en/overview',
+          badges: ['hands-on', 'essential'], time: '120 min',
+          steps: [
+            'Pick one of your real projects',
+            'Choose 4+ of: subagent, skill, hook, custom slash command, headless, MCP, SDK',
+            'Build one feature that uses all of them end-to-end',
+            'Timebox to 2 hours — ship imperfect, not unfinished'
+          ],
+          check: 'Capstone feature runs end-to-end and integrates 4+ primitives'
+        }
+      ],
+      practice: [
+        { id: 'w4p1', text: 'Official devcontainer running locally' },
+        { id: 'w4p2', text: '/rewind used to undo a Claude mistake' },
+        { id: 'w4p3', text: 'Custom statusline shows model + token count' },
+        { id: 'w4p4', text: 'IDE extension installed and used for one real session' },
+        { id: 'w4p5', text: 'One PR auto-reviewed by claude-code-action' },
+        { id: 'w4p6', text: 'Capstone integrates at least 4 of: subagent, skill, hook, slash command, headless, MCP, SDK' }
+      ]
+    }
+  ],
+  repos: [
+    { name: 'anthropics/claude-code', desc: 'Official repo — devcontainer, releases, issues', url: 'https://github.com/anthropics/claude-code' },
+    { name: 'claude-agent-sdk', desc: 'Python + TypeScript SDK packages', url: 'https://code.claude.com/docs/en/agent-sdk/overview' },
+    { name: 'claude-code-action', desc: 'Official GitHub Actions integration', url: 'https://code.claude.com/docs/en/github-actions' }
+  ],
+  refGroups: [
+    {
+      title: 'Start here',
+      items: [
+        { name: 'Overview', desc: 'Feature map and quickstart — read this first', url: 'https://code.claude.com/docs/en/overview' },
+        { name: 'CLI reference', desc: 'Every flag and env var in one page', url: 'https://code.claude.com/docs/en/cli-reference' },
+        { name: 'Changelog', desc: 'What shipped in each release — check weekly', url: 'https://code.claude.com/docs/en/changelog' }
+      ]
+    },
+    {
+      title: 'Courses & tutorials',
+      items: [
+        { name: 'Tutorials index (browse all)', desc: 'Short topic reads and videos — companion tutorials are linked per-day above', url: 'https://claude.com/resources/tutorials' },
+        { name: 'Anthropic Courses hub', desc: 'Browse all structured paths — filter for Claude Code (skip API-key notebooks)', url: 'https://claude.com/resources/courses' },
+        { name: 'Anthropic Learn', desc: 'Top-level landing page for Anthropic educational material', url: 'https://www.anthropic.com/learn' }
+      ]
+    },
+    {
+      title: 'Cost & context',
+      items: [
+        { name: 'Context window', desc: '/clear, /compact, /resume — the cost levers', url: 'https://code.claude.com/docs/en/context-window' },
+        { name: 'Model config', desc: '/model, aliases (opusplan), effort levels', url: 'https://code.claude.com/docs/en/model-config' },
+        { name: 'Common workflows', desc: 'Plan mode, ultrathink, @mentions, git patterns', url: 'https://code.claude.com/docs/en/common-workflows' }
+      ]
+    },
+    {
+      title: 'Customize Claude',
+      items: [
+        { name: 'Memory (CLAUDE.md)', desc: 'Always-loaded rules; project vs user; @ imports', url: 'https://code.claude.com/docs/en/memory' },
+        { name: 'Settings & permissions', desc: 'allowedTools, denyTools, permission modes', url: 'https://code.claude.com/docs/en/settings' },
+        { name: 'Slash commands (built-in)', desc: 'The commands shipped with Claude Code', url: 'https://code.claude.com/docs/en/commands' }
+      ]
+    },
+    {
+      title: 'Extensions you write',
+      items: [
+        { name: 'Hooks', desc: 'Deterministic shell commands around tool calls', url: 'https://code.claude.com/docs/en/hooks' },
+        { name: 'Skills', desc: 'Markdown + YAML, loaded on demand (not always)', url: 'https://code.claude.com/docs/en/skills' },
+        { name: 'Sub-agents', desc: 'Context-isolated workers with tool restrictions', url: 'https://code.claude.com/docs/en/sub-agents' }
+      ]
+    },
+    {
+      title: 'Programmable Claude',
+      items: [
+        { name: 'MCP', desc: 'Add external tools via protocol servers', url: 'https://code.claude.com/docs/en/mcp' },
+        { name: 'Agent SDK', desc: 'Python/TS — embed Claude directly in your app', url: 'https://code.claude.com/docs/en/agent-sdk/overview' },
+        { name: 'Headless (-p)', desc: 'Scriptable JSON output for cron and CI', url: 'https://code.claude.com/docs/en/headless' },
+        { name: 'GitHub Actions', desc: 'Auto PR review and @claude mentions', url: 'https://code.claude.com/docs/en/github-actions' }
+      ]
+    },
+    {
+      title: 'Safety & QoL',
+      items: [
+        { name: 'Sandboxing', desc: 'OS-level isolation (distinct from Docker)', url: 'https://code.claude.com/docs/en/sandboxing' },
+        { name: 'Devcontainer', desc: 'Official env safe for --dangerously-skip-permissions', url: 'https://code.claude.com/docs/en/devcontainer' },
+        { name: 'Checkpointing', desc: '/rewind to undo the last action', url: 'https://code.claude.com/docs/en/checkpointing' }
+      ]
+    },
+    {
+      title: 'Video',
+      items: [
+        { name: 'Anthropic YouTube', desc: 'Official channel — release demos only; third-party tutorials go stale fast', url: 'https://www.youtube.com/@anthropic-ai' }
+      ]
+    }
+  ]
+};
+
+const STORAGE_KEY = 'claude-study-plan-progress';
+
+function loadProgress() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+
+function saveProgress(state) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function badgeHTML(type) {
+  const labels = { read: 'READ', 'hands-on': 'HANDS-ON', essential: 'ESSENTIAL', 'fix-leak': 'FIX-LEAK' };
+  return `<span class="badge badge-${type}">${labels[type]}</span>`;
+}
+
+function render() {
+  const state = loadProgress();
+  const content = document.getElementById('content');
+  const pills = document.getElementById('phasePills');
+  let totalItems = 0, checkedItems = 0;
+  let html = '';
+  let pillsHtml = '';
+
+  DATA.phases.forEach(phase => {
+    const allIds = [...phase.items.map(i => i.id), ...phase.practice.map(p => p.id)];
+    const phaseChecked = allIds.filter(id => state[id]).length;
+    const phaseTotal = allIds.length;
+    totalItems += phaseTotal;
+    checkedItems += phaseChecked;
+
+    pillsHtml += `<a href="#${phase.id}" class="phase-pill" style="color:${phase.color};border-color:${phase.color}30;background:${phase.color}10">${phase.number} · ${phaseChecked}/${phaseTotal}</a>`;
+
+    html += `<div class="phase" id="${phase.id}">`;
+    html += `<div class="phase-header">`;
+    html += `<span class="phase-number" style="background:${phase.color}18;color:${phase.color};border:1px solid ${phase.color}30">${phase.number}</span>`;
+    html += `<span class="phase-title">${phase.title}</span>`;
+    html += `<span class="phase-progress-text" style="color:${phase.color}">${phaseChecked}/${phaseTotal}</span>`;
+    html += `</div>`;
+    html += `<div class="phase-meta">${phase.week}</div>`;
+
+    phase.items.forEach(item => {
+      const checked = state[item.id] ? 'checked' : '';
+      const completed = state[item.id] ? 'completed' : '';
+      html += `<div class="card ${completed}"><div class="card-top">`;
+      html += `<label class="checkbox-wrap"><input type="checkbox" ${checked} onchange="toggle('${item.id}')"><span class="checkmark"></span></label>`;
+      html += `<div class="card-body">`;
+      html += `<div class="card-label">${item.label} · ${item.time || ''}</div>`;
+      html += `<div class="card-title">${item.badges.map(badgeHTML).join('')} ${item.title}</div>`;
+      html += `<div class="card-desc">${item.desc}</div>`;
+      html += `<a class="card-link" href="${item.url}" target="_blank">${item.url}</a>`;
+      if (item.steps && item.steps.length) {
+        html += `<div class="card-steps"><div class="card-steps-title">STEPS</div><ol>`;
+        item.steps.forEach(s => { html += `<li>${s}</li>`; });
+        html += `</ol></div>`;
+      }
+      if (item.check) html += `<div class="card-check">${item.check}</div>`;
+      if (item.extras && item.extras.length) {
+        html += `<div class="card-extras"><div class="card-extras-label">COMPANION TUTORIALS</div>`;
+        item.extras.forEach(x => {
+          html += `<a class="card-extra" href="${x.url}" target="_blank">${x.name}</a>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div></div></div>`;
+    });
+
+    html += `<div class="practice"><div class="practice-title">▸ PRACTICE CHECKLIST</div>`;
+    phase.practice.forEach(p => {
+      const checked = state[p.id] ? 'checked' : '';
+      const completed = state[p.id] ? 'completed-practice' : '';
+      html += `<div class="practice-item ${completed}">`;
+      html += `<label class="checkbox-wrap" style="width:18px;height:18px;margin-top:3px">`;
+      html += `<input type="checkbox" ${checked} onchange="toggle('${p.id}')" style="width:18px;height:18px">`;
+      html += `<span class="checkmark" style="width:18px;height:18px;border-radius:4px"></span></label>`;
+      html += `<span>${p.text}</span></div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  content.innerHTML = html;
+  pills.innerHTML = pillsHtml;
+
+  const pct = totalItems > 0 ? Math.round((checkedItems / totalItems) * 100) : 0;
+  document.getElementById('progressText').textContent = `${checkedItems} / ${totalItems}  (${pct}%)`;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // repos
+  document.getElementById('reposGrid').innerHTML = DATA.repos.map(r =>
+    `<div class="ref-item"><div><div class="ref-item-name">${r.name}</div><div class="ref-item-desc">${r.desc}</div></div><a href="${r.url}" target="_blank">Open ↗</a></div>`
+  ).join('');
+
+  document.getElementById('refGrid').innerHTML = DATA.refGroups.map(g =>
+    `<div class="ref-group-title">${g.title}</div>` +
+    g.items.map(r =>
+      `<div class="ref-item"><div><div class="ref-item-name">${r.name}</div><div class="ref-item-desc">${r.desc}</div></div><a href="${r.url}" target="_blank">Open ↗</a></div>`
+    ).join('')
+  ).join('');
+}
+
+function toggle(id) {
+  const state = loadProgress();
+  state[id] = !state[id];
+  saveProgress(state);
+  render();
+}
+
+function resetProgress() {
+  if (confirm('Reset all progress? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    render();
+  }
+}
+
+render();
+</script>
+</body>
+</html>
